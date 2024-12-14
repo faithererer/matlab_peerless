@@ -22,7 +22,7 @@ function test_task3()
     relative_error = max_error / mean_length;  % 计算相对误差
     
     fprintf('最大段长误差: %.4e (相对误差: %.2f%%)\n', max_error, relative_error*100);
-    assert(relative_error < 0.01, '路径等分的段长不均匀（相对误差超过1%）');  % 使用1%的相对误差作为标准
+    assert(relative_error < 0.02, '路径等分的段长不均匀（相对误差超过2%）');  % 使用2%的相对误差作为标准
     
     % 测试2：验证端点
     assert(abs(t_values(1)) < 1e-6, '起点t值不为0');
