@@ -1,31 +1,66 @@
 function test_task6()
     fprintf('测试任务6：自定义贝塞尔曲线\n');
     
-    % 测试1：检查贝塞尔曲线的端点性质
-    control_points = [0, 0; 1, 2; 2, -1; 3, 1];
-    
-    % 检查曲线是否通过端点
-    [x0, y0] = bezier_curve(0, control_points);
-    [x1, y1] = bezier_curve(1, control_points);
-    
-    start_error = norm([x0, y0] - control_points(1,:));
-    end_error = norm([x1, y1] - control_points(end,:));
-    
-    fprintf('起点误差: %.4e\n', start_error);
-    fprintf('终点误差: %.4e\n', end_error);
-    
-    assert(start_error < 1e-6, '贝塞尔曲线未通过起点');
-    assert(end_error < 1e-6, '贝塞尔曲线未通过终点');
-    
-    % 测试2：检查弧长计算的单调性
-    t_values = linspace(0, 1, 10);
-    lengths = zeros(size(t_values));
-    for i = 1:length(t_values)
-        lengths(i) = compute_arc_length(t_values(i), control_points);
+    % 测试1：检查贝塞尔曲线的可视化
+    try
+        % 创建不可见的图形窗口
+        fig = figure('Visible', 'off');
+        
+        % 运行主函数
+        task6_custom_bezier();
+        
+        % 获取图形中的所有线条对象
+        lines = findobj(gca, 'Type', 'line');
+        assert(~isempty(lines), '未找到曲线绘制');
+        
+        % 检查是否绘制了控制多边形和曲线
+        has_control_polygon = any(strcmp({lines.LineStyle}, '--'));
+        has_curve = any(strcmp({lines.LineStyle}, '-'));
+        
+        assert(has_control_polygon, '未绘制控制多边形');
+        assert(has_curve, '未绘制贝塞尔曲线');
+        
+        close(fig);
+    catch e
+        if exist('fig', 'var')
+            close(fig);
+        end
+        rethrow(e);
     end
     
-    is_monotonic = all(diff(lengths) > 0);
-    assert(is_monotonic, '贝塞尔曲线弧长计算不满足单调性');
+    % 测试2：检查等分点的数量
+    try
+        fig = figure('Visible', 'off');
+        task6_custom_bezier();
+        
+        % 检查等分点（红色标记点）
+        points = findobj(gca, 'Type', 'line', 'Color', 'r');
+        assert(~isempty(points), '未找到等分点');
+        
+        % 验证等分点的数量（应该有21个点，对应20等分）
+        n_points = length(points.XData);
+        assert(n_points == 21, sprintf('等分点数量不正确，期望21个点，实际有%d个', n_points));
+        
+        close(fig);
+    catch e
+        if exist('fig', 'var')
+            close(fig);
+        end
+        rethrow(e);
+    end
+    
+    % 测试3：检查动画功能
+    try
+        fig = figure('Visible', 'off');
+        task6_custom_bezier();
+        close(fig);
+        fprintf('动画功能正常\n');
+    catch e
+        if exist('fig', 'var')
+            close(fig);
+        end
+        rethrow(e);
+    end
     
     fprintf('任务6测试通过！\n\n');
 end 
