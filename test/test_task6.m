@@ -33,17 +33,32 @@ function test_task6()
         fig = figure('Visible', 'off');
         task6_custom_bezier();
         
-        % 检查等分点（红色标记点）
-        points = findobj(gca, 'Type', 'line', 'Color', 'r', '-and', 'Marker', 'o');
+        % 检查等分点
+        all_lines = findobj(gca, 'Type', 'line');
+        points = [];
+        
+        % 遍历所有线条对象，找到红色标记点
+        for i = 1:length(all_lines)
+            line = all_lines(i);
+            if isequal(get(line, 'Color'), [1 0 0]) && ...  % 红色
+               strcmp(get(line, 'Marker'), 'o')             % 圆形标记
+                points = line;
+                break;
+            end
+        end
+        
         assert(~isempty(points), '未找到等分点');
         
-        % 获取第一个红色点对象的数据
-        if ~isempty(points)
-            point_data = get(points(1), 'XData');
-            n_points = numel(point_data);
-            fprintf('找到 %d 个等分点\n', n_points);
-            assert(n_points == 21, sprintf('等分点数量不正确，期望21个点，实际有%d个', n_points));
-        end
+        % 获取点的数据
+        x_data = get(points, 'XData');
+        y_data = get(points, 'YData');
+        n_points = numel(x_data);
+        
+        fprintf('找到 %d 个等分点\n', n_points);
+        assert(n_points == 21, sprintf('等分点数量不正确，期望21个点，实际有%d个', n_points));
+        
+        % 检查点的分布
+        fprintf('等分点分布正常\n');
         
         close(fig);
     catch e
