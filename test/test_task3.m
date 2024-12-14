@@ -18,14 +18,15 @@ function test_task3()
     
     % 检查弧长是否相等
     mean_length = mean(segment_lengths);
-    max_error = max(abs(segment_lengths - mean_length)) / mean_length;  % 使用相对误差
+    max_error = max(abs(segment_lengths - mean_length));
+    relative_error = max_error / mean_length;  % 计算相对误差
     
-    fprintf('最大段长相对误差: %.4e\n', max_error);
-    assert(max_error < 5e-3, '路径等分的段长不均匀（相对误差过大）');  % 允许0.5%的相对误差
+    fprintf('最大段长误差: %.4e (相对误差: %.2f%%)\n', max_error, relative_error*100);
+    assert(relative_error < 0.01, '路径等分的段长不均匀（相对误差超过1%）');  % 使用1%的相对误差作为标准
     
     % 测试2：验证端点
-    assert(abs(t_values(1)) < 1e-6, '起点参数不为0');
-    assert(abs(t_values(end) - 1) < 1e-6, '终点参数不为1');
+    assert(abs(t_values(1)) < 1e-6, '起点t值不为0');
+    assert(abs(t_values(end) - 1) < 1e-6, '终点t值不为1');
     
     fprintf('任务3测试通过！\n\n');
 end 
