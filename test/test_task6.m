@@ -14,8 +14,12 @@ function test_task6()
         assert(~isempty(lines), '未找到曲线绘制');
         
         % 检查是否绘制了控制多边形和曲线
-        has_control_polygon = any(strcmp({lines.LineStyle}, '--'));
-        has_curve = any(strcmp({lines.LineStyle}, '-'));
+        line_styles = get(lines, 'LineStyle');
+        if ~iscell(line_styles)
+            line_styles = {line_styles};
+        end
+        has_control_polygon = any(strcmp(line_styles, '--'));
+        has_curve = any(strcmp(line_styles, '-'));
         
         assert(has_control_polygon, '未绘制控制多边形');
         assert(has_curve, '未绘制贝塞尔曲线');
@@ -34,11 +38,25 @@ function test_task6()
         task6_custom_bezier();
         
         % 检查等分点（红色标记点）
-        points = findobj(gca, 'Type', 'line', 'Color', 'r');
+        points = findobj(gca, 'Type', 'line', 'Color', 'r', 'Marker', 'o');
         assert(~isempty(points), '未找到等分点');
         
-        % 验证等分点的数量（应该有21个点，对应20等分）
-        n_points = length(points.XData);
+        % 获取所有红色点的数据
+        all_points = [];
+        for i = 1:length(points)
+            x_data = get(points(i), 'XData');
+            if ~isempty(x_data)
+                if isscalar(x_data)
+                    all_points = [all_points; 1];
+                else
+                    all_points = [all_points; length(x_data)];
+                end
+            end
+        end
+        
+        % 验证等分点的总数
+        n_points = sum(all_points);
+        fprintf('找到 %d 个等分点\n', n_points);
         assert(n_points == 21, sprintf('等分点数量不正确，期望21个点，实际有%d个', n_points));
         
         close(fig);
