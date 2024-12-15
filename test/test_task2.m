@@ -15,7 +15,7 @@ for s = test_points
     ratio = current_length / total_length;  % 计算比例
     
     % 输出计算的比例，并确保精度为三位小数
-    fprintf('    计算的比例 = %.3f\n, 误差 = %.5f\n', ratio, abs(ratio - s));
+    fprintf('    计算的比例 = %.3f, 误差 = %.5f\n', ratio, abs(ratio - s));
     
     % 使用 assert 验证比例是否匹配目标比例，允许容差为 1e-3
     assert(abs(ratio - s) < 1e-3, '参数查找错误：比例不匹配');
