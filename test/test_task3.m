@@ -1,33 +1,8 @@
-function test_task3()
-    fprintf('测试任务3：路径等分\n');
-    
-    % 测试1：检查等分点的间距是否相等
-    n = 10;  % 测试10等分
-    s_values = linspace(0, 1, n+1);
-    t_values = zeros(size(s_values));
-    
-    for i = 1:length(s_values)
-        t_values(i) = task2_find_t(s_values(i));
-    end
-    
-    % 计算每段的实际弧长
-    segment_lengths = zeros(n, 1);
-    for i = 1:n
-        segment_lengths(i) = task1_arc_length(t_values(i+1)) - task1_arc_length(t_values(i));
-    end
-    
-    % 检查弧长是否相等
-    mean_length = mean(segment_lengths);
-    max_error = max(abs(segment_lengths - mean_length));
-    relative_error = max_error / mean_length;  % 计算相对误差
-    
-    fprintf('最大段长误差: %.4e (相对误差: %.2f%%)\n', max_error, relative_error*100);
-    assert(relative_error < 0.02, '路径等分的段长不均匀（相对误差超过2%）');  % 使用2%的相对误差作为标准
-    
-    % 测试2：验证端点（使用更宽松的精度要求）
-    fprintf('端点值: t(0) = %.6e, t(1) = %.6e\n', t_values(1), t_values(end));
-    assert(abs(t_values(1)) < 1e-3, '起点t值误差过大');
-    assert(abs(t_values(end) - 1) < 1e-3, '终点t值误差过大');
-    
-    fprintf('任务3测试通过！\n\n');
-end 
+% 等分为 4 段
+fprintf('等分为 4 段：\n');
+task3_equipartition(4);
+
+
+% 等分为 20 段
+fprintf('等分为 20 段：\n');
+task3_equipartition(20);
