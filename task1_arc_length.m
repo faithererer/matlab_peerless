@@ -51,12 +51,12 @@ function integral = adaptive_quad_recursive(f, a, b, tol, S, fa, fc, fb)
     S1 = h*(fa + 4*fd + fc)/6;
     S2 = h*(fc + 4*fe + fb)/6;
     
-    % 比较精度
-    if abs(S1 + S2 - S) <= 15*tol
+    % 比较精度（相对误差）
+    if abs(S1 + S2 - S) < tol * abs(S1 + S2)
         integral = S1 + S2;
     else
         % 递归细分区间
         integral = adaptive_quad_recursive(f, a, c, tol/2, S1, fa, fd, fc) + ...
                   adaptive_quad_recursive(f, c, b, tol/2, S2, fc, fe, fb);
     end
-end 
+end
