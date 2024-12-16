@@ -31,5 +31,32 @@ function test_task4()
     fprintf('二分法: %.4f秒\n', t_bisection);
     fprintf('牛顿法: %.4f秒\n', t_newton);
     
+    % 测试3：绘制等分效果对比
+    fprintf('\n绘制等分效果对比：\n');
+    
+    % 4等分
+    figure('Name', '4等分对比');
+    subplot(1,2,1);
+    task3_equipartition(4);
+    title('二分法等分 (n=4)');
+    
+    subplot(1,2,2);
+    task4_equipartition(4);
+    title('牛顿法等分 (n=4)');
+    
+    % 20等分
+    figure('Name', '20等分对比');
+    subplot(1,2,1);
+    task3_equipartition(20);
+    title('二分法等分 (n=20)');
+    
+    subplot(1,2,2);
+    task4_equipartition(20);
+    title('牛顿法等分 (n=20)');
+    
+    % 给用户时间观察图像
+    pause(5);
+    close all;
+    
     fprintf('任务4测试通过！\n\n');
 end 
