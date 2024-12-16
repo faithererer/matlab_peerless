@@ -1,4 +1,7 @@
 function task5_original_motion()
+    % 创建新的figure
+    figure;
+    
     % 设置图形窗口
     set(gca, 'XLim', [-0.5 2.5], 'YLim', [-0.5 2.5], ...
         'Drawmode', 'fast', 'Visible', 'on');

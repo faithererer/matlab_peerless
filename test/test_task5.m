@@ -22,7 +22,6 @@ function test_task5()
     % 测试2：原始参数运动
     fprintf('\n测试原始参数运动：\n');
     try
-        figure('Name', '原始参数运动');
         task5_original_motion();
         pause(2);
     catch e
@@ -32,7 +31,6 @@ function test_task5()
     % 测试3：等速运动
     fprintf('\n测试等速运动：\n');
     try
-        figure('Name', '等速运动');
         task5_constant_speed();
         pause(2);
     catch e
