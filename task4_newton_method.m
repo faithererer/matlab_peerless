@@ -3,12 +3,12 @@
 
 function t_star = task4_newton_method(s)
     % 计算总弧长
-    total_length = task1_arc_length(1);
-    target_length = s * total_length;
+    total_length = task1_arc_length(1);  % 计算路径从 t=0 到 t=1 的总弧长
+    target_length = s * total_length; % 计算目标弧长，目标是将路径分割成 s 比例
     
     % 牛顿法参数
-    tol = 1e-3;
-    max_iter = 100;
+    tol = 1e-3; % 收敛容忍度
+    max_iter = 100; % 最大迭代次数
     t = s;  % 使用s作为初始猜测值
     
     for i = 1:max_iter
@@ -19,7 +19,7 @@ function t_star = task4_newton_method(s)
         % 计算导数：弧长对t的导数就是速度
         df = sqrt(velocity(t));
         
-        % 牛顿迭代
+        % 牛顿迭代 t_{n+1}=t_n-\frac{f(t_n)}{f'(t_n)}
         t_new = t - f/df;
         
         % 检查收敛
@@ -44,8 +44,8 @@ end
 % 使用牛顿法的等分函数
 function task4_equipartition(n)
     % 计算等分点
-    s_values = linspace(0, 1, n+1);
-    t_values = zeros(size(s_values));
+    s_values = linspace(0, 1, n+1); % 生成从 0 到 1 的n+1 个均匀分布的 s 值
+    t_values = zeros(size(s_values)); % 初始化 t_values 为零
     
     % 对每个s计算对应的t值，使用牛顿法
     for i = 1:length(s_values)
