@@ -8,7 +8,7 @@ function t_star = task4_newton_method(s)
     
     % 牛顿法参数
     tol = 1e-3;
-    max_iter = 100;
+    max_iter = 1000;
     t = s;  % 使用s作为初始猜测值
     
     for i = 1:max_iter
