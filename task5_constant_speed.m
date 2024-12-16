@@ -21,7 +21,7 @@ function task5_constant_speed()
     
     % 等速运动
     title('Motion with Constant Speed');
-    for s = linspace(0, 1, 100)
+    for s = linspace(0, 1, 50)  % 减少帧数，增加每帧时间
         % 找到对应的参数t
         t = task2_find_t(s);
         
@@ -32,6 +32,6 @@ function task5_constant_speed()
         % 使用题目要求的命令更新位置
         set(ball, 'xdata', x, 'ydata', y);
         drawnow;
-        pause(0.01);
+        pause(0.05);  % 增加暂停时间
     end
 end 

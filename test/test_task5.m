@@ -23,7 +23,7 @@ function test_task5()
     fprintf('\n测试原始参数运动：\n');
     try
         task5_original_motion();
-        pause(2);
+        pause(5);
     catch e
         fprintf('原始参数运动测试失败：%s\n', e.message);
     end
@@ -32,7 +32,7 @@ function test_task5()
     fprintf('\n测试等速运动：\n');
     try
         task5_constant_speed();
-        pause(2);
+        pause(5);
     catch e
         fprintf('等速运动测试失败：%s\n', e.message);
     end
