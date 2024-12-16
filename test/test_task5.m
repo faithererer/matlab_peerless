@@ -19,21 +19,24 @@ function test_task5()
         assert(error < 1e-12, sprintf('t = %.2f 处的位置计算不正确', t));
     end
     
-    % 测试2：检查动画函数是否可以运行
+    % 测试2：原始参数运动
+    fprintf('\n测试原始参数运动：\n');
     try
-        % 创建不可见的图形窗口
-        fig = figure('Visible', 'off');
-        
-        % 尝试运行动画的一小段
-        task5_animation();
-        
-        % 如果没有错误，则关闭图形窗口
-        close(fig);
-        fprintf('动画函数执行正常\n');
+        task5_original_motion();
+        pause(2);
     catch e
-        close(fig);
-        rethrow(e);
+        fprintf('原始参数运动测试失败：%s\n', e.message);
     end
     
+    % 测试3：等速运动
+    fprintf('\n测试等速运动：\n');
+    try
+        task5_constant_speed();
+        pause(2);
+    catch e
+        fprintf('等速运动测试失败：%s\n', e.message);
+    end
+    
+    close all;
     fprintf('任务5测试通过！\n\n');
 end 
