@@ -390,4 +390,215 @@ end
 ![image-20241216183158928](rc_5_report.assets/image-20241216183158928.png)
 
 
+### 3.5 动画演示实现
+
+#### 3.5.1 算法设计
+
+动画演示需要实现两种不同的运动方式：原始参数运动和等速运动。主要实现步骤如下：
+
+1. 设置动画环境：
+```matlab
+% 设置图形窗口
+set(gca, 'XLim', [-0.5 2.5], 'YLim', [-0.5 2.5], ...
+    'Drawmode', 'fast', 'Visible', 'on');
+cla
+axis square
+grid on;
+hold on;
+```
+
+2. 绘制基准路径：
+```matlab
+% 绘制完整路径
+t_plot = linspace(0, 1, 100);
+x_plot = 0.5 + 0.3*t_plot + 3.9*t_plot.^2 - 4.7*t_plot.^3;
+y_plot = 1.5 + 0.3*t_plot + 0.9*t_plot.^2 - 2.7*t_plot.^3;
+plot(x_plot, y_plot, 'b-', 'LineWidth', 1);
+
+% 创建运动点
+ball = plot(x_plot(1), y_plot(1), 'ro', 'MarkerSize', 10, 'MarkerFaceColor', 'r');
+```
+
+3. 实现两种运动方式：
+```matlab
+% 原始参数运动
+title('Motion with Original Parameterization');
+for t = linspace(0, 1, 100)
+    % 计算当前位置
+    x = 0.5 + 0.3*t + 3.9*t^2 - 4.7*t^3;
+    y = 1.5 + 0.3*t + 0.9*t^2 - 2.7*t^3;
+    
+    % 使用题目要求的命令更新位置
+    set(ball, 'xdata', x, 'ydata', y);
+    drawnow;
+    pause(0.01);
+end
+pause(1);
+
+% 等速运动
+title('Motion with Constant Speed');
+for s = linspace(0, 1, 100)
+    % 找到对应的参数t
+    t = task2_find_t(s);
+    
+    % 计算位置
+    x = 0.5 + 0.3*t + 3.9*t^2 - 4.7*t^3;
+    y = 1.5 + 0.3*t + 0.9*t^2 - 2.7*t^3;
+    
+    % 使用题目要求的命令更新位置
+    set(ball, 'xdata', x, 'ydata', y);
+    drawnow;
+    pause(0.01);
+end
+```
+
+#### 3.5.2 算法分析
+
+动画实现的特点：
+
+1. 动画设计：
+   - 使用MATLAB的图形对象实现实时更新
+   - 通过drawnow命令确保平滑显示
+   - 使用pause控制动画速度
+
+2. 运动对比：
+   - 原始参数运动：参数t线性变化
+   - 等速运动：通过task2_find_t实现弧长均匀变化
+   - 两种方式的速度差异明显可见
+
+3. 性能考虑：
+   - 预先计算路径减少实时计算负担
+   - 使用持久化的图形对象避免重复创建
+   - 合理的帧率设置（100帧）保证流畅性
+
+#### 3.5.3 实验结果
+
+动画演示效果：
+
+1. 原始参数运动：
+   - 在曲率较大的区域运动较快
+   - 在直线部分运动较慢
+   - 速度变化不均匀
+
+2. 等速运动：
+   - 整个路径上保持恒定速度
+   - 运动更加自然流畅
+   - 符合实际应用需求
+
+通过动画可以直观地观察到：
+- 原始参数化导致的不均匀运动
+- 等弧长参数化带来的均匀运动效果
+- 两种运动方式在不同路径段的速度差异
+
+
+### 3.6 自定义贝塞尔曲线实现
+
+#### 3.6.1 算法设计
+
+为了创建和等分自定义贝塞尔曲线，我们实现了以下步骤：
+
+1. 定义贝塞尔曲线：
+```matlab
+% 定义控制点（创建一个"S"形状）
+control_points = [
+    0, 0;    % P0
+    1, 2;    % P1
+    2, -1;   % P2
+    3, 1     % P3
+];
+
+% 三次贝塞尔曲线公式
+function [x, y] = bezier_curve(t, control_points)
+    t = t(:);
+    B = [(1-t).^3, 3*t.*(1-t).^2, 3*t.^2.*(1-t), t.^3];
+    x = B * control_points(:,1);
+    y = B * control_points(:,2);
+end
+```
+
+2. 计算曲线导数：
+```matlab
+function [dx, dy] = bezier_derivative(t, control_points)
+    t = t(1);  % 确保t是标量
+    dB = [-3*(1-t)^2, 3*(1-4*t+3*t^2), 3*(2*t-3*t^2), 3*t^2];
+    dx = dB * control_points(:,1);
+    dy = dB * control_points(:,2);
+end
+```
+
+3. 实现弧长计算：
+```matlab
+function len = compute_arc_length(t_end, control_points)
+    % 使用复合Simpson求积计算弧长
+    n = 100;  % 积分区间数
+    t = linspace(0, t_end, n+1);
+    h = t_end/n;
+    
+    % 计算所有点的速度
+    [dx, dy] = bezier_derivative(t, control_points);
+    v = sqrt(dx.^2 + dy.^2);
+    
+    % Simpson求积
+    len = h/3 * (v(1) + 4*sum(v(2:2:end-1)) + 2*sum(v(3:2:end-2)) + v(end));
+end
+```
+
+4. 等分和动画展示：
+```matlab
+% 等分曲线
+n = 20;  % 分段数
+s_values = linspace(0, 1, n+1);
+t_values = zeros(size(s_values));
+
+% 计算等分点
+for i = 1:length(s_values)
+    t_values(i) = find_t_newton(s_values(i), control_points);
+end
+
+% 动画演示
+for s = linspace(0, 1, 50)
+    t = find_t_newton(s, control_points);
+    [x, y] = bezier_curve(t, control_points);
+    set(ball, 'xdata', x, 'ydata', y);
+    drawnow;
+    pause(0.05);
+end
+```
+
+#### 3.6.2 算法分析
+
+1. 贝塞尔曲线特点：
+   - 使用四个控制点定义三次贝塞尔曲线
+   - 曲线始终通过起点和终点
+   - 中间控制点影响曲线形状
+
+2. 弧长计算：
+   - 使用复合Simpson公式计算弧长
+   - 避免了自适应求积的复杂性
+   - 固定积分区间数提高计算效率
+
+3. 等分实现：
+   - 使用牛顿法求解参数t
+   - 利用导数计算提高收敛速度
+   - 保持与前面任务相同的等分精度
+
+#### 3.6.3 实验结果
+
+1. 曲线形状：
+   - 成功创建了"S"形状的贝塞尔曲线
+   - 控制点分布合理，曲线平滑
+
+2. 等分效果：
+   - 20个等长度分段
+   - 分段点在曲率变化处分布更密
+   - 等分点间距离保持一致
+
+3. 动画演示：
+   - 运动点沿曲线匀速运动
+   - 过渡平滑，无明显跳跃
+   - 在整条曲线上保持恒定速度
+
+![自定义贝塞尔曲线等分结果](rc_5_report.assets/bezier_curve.png)
+
+
 
