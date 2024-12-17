@@ -71,21 +71,21 @@ function t = find_t_newton(s, control_points)
     t = s;  % 初始猜测
     tol = 1e-6;
     max_iter = 50;
+    total_length = compute_arc_length(1, control_points);
     
     for i = 1:max_iter
-        [x, y] = bezier_curve(t, control_points);
+        current_length = compute_arc_length(t, control_points);
         [dx, dy] = bezier_derivative(t, control_points);
         
-        % 计算当前弧长比例
-        current_s = compute_arc_length(t, control_points) / ...
-                   compute_arc_length(1, control_points);
-        
         % 计算函数值和导数
-        f = current_s - s;
-        df = sqrt(dx^2 + dy^2) / compute_arc_length(1, control_points);
+        f = current_length/total_length - s;
+        df = sqrt(dx^2 + dy^2)/total_length;
         
         % 牛顿迭代
         t_new = t - f/df;
+        
+        % 确保t_new在[0,1]范围内
+        t_new = max(0, min(1, t_new));
         
         % 检查收敛
         if abs(t_new - t) < tol
@@ -98,8 +98,12 @@ end
 
 function [dx, dy] = bezier_derivative(t, control_points)
     % 计算贝塞尔曲线的导数
-    t = t(1);  % 确保t是标量
-    dB = [-3*(1-t)^2, 3*(1-4*t+3*t^2), 3*(2*t-3*t^2), 3*t^2];
+    t = t(:);  % 确保t是列向量
+    
+    % 计算导数的基函数
+    dB = [-3*(1-t).^2, 3*(1-4*t+3*t.^2), 3*(2*t-3*t.^2), 3*t.^2];
+    
+    % 计算x和y方向的导数
     dx = dB * control_points(:,1);
     dy = dB * control_points(:,2);
 end
