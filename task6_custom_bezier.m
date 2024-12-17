@@ -2,6 +2,11 @@
 % 题目6：创建自定义贝塞尔曲线路径并进行等分
 
 function task6_custom_bezier
+    % 创建输出目录（如果不存在）
+    if ~exist('out', 'dir')
+        mkdir('out');
+    end
+    
     % 创建新的figure并设置固定大小
     fig = figure('Position', [100 100 800 600], 'Units', 'pixels');
     
@@ -47,6 +52,18 @@ function task6_custom_bezier
     % 创建运动点
     ball = plot(x_plot(1), y_plot(1), 'ro', 'MarkerSize', 10, 'MarkerFaceColor', 'r');
     
+    % 获取第一帧并确定视频大小
+    drawnow;
+    frame = getframe(fig);
+    [height, width, ~] = size(frame.cdata);
+    
+    % 创建视频写入对象
+    v = VideoWriter(fullfile('out', 'bezier_motion.avi'));
+    v.FrameRate = 20;
+    v.Quality = 100;
+    open(v);
+    writeVideo(v, frame);  % 写入第一帧
+    
     % 等速运动演示
     title('Motion with Constant Speed on Bezier Curve');
     for s = linspace(0, 1, 50)
@@ -56,8 +73,20 @@ function task6_custom_bezier
         % 使用题目要求的命令更新位置
         set(ball, 'xdata', x, 'ydata', y);
         drawnow;
+        
+        % 捕获当前帧并写入视频
+        frame = getframe(fig);
+        if size(frame.cdata, 1) ~= height || size(frame.cdata, 2) ~= width
+            frame.cdata = imresize(frame.cdata, [height width]);
+        end
+        writeVideo(v, frame);
+        
         pause(0.05);
     end
+    
+    % 关闭视频文件
+    close(v);
+    fprintf('动画已保存到 out/bezier_motion.avi\n');
 end
 
 function [x, y] = bezier_curve(t, control_points)
