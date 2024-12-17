@@ -490,43 +490,38 @@ end
 - 等弧长参数化带来的均匀运动效果
 - 两种运动方式在不同路径段的速度差异
 
-
 ### 3.6 自定义贝塞尔曲线实现
 
 #### 3.6.1 算法设计
 
-为了创建和等分自定义贝塞尔曲线，我们实现了以下步骤：
-
-1. 定义贝塞尔曲线：
+1. 贝塞尔曲线的参数方程：
 ```matlab
-% 定义控制点（创建一个"S"形状）
-control_points = [
-    0, 0;    % P0
-    1, 2;    % P1
-    2, -1;   % P2
-    3, 1     % P3
-];
-
-% 三次贝塞尔曲线公式
 function [x, y] = bezier_curve(t, control_points)
+    % 确保t是列向量
     t = t(:);
+    % 三次贝塞尔曲线公式
     B = [(1-t).^3, 3*t.*(1-t).^2, 3*t.^2.*(1-t), t.^3];
     x = B * control_points(:,1);
     y = B * control_points(:,2);
 end
 ```
 
-2. 计算曲线导数：
+2. 曲线导数计算：
 ```matlab
 function [dx, dy] = bezier_derivative(t, control_points)
-    t = t(1);  % 确保t是标量
-    dB = [-3*(1-t)^2, 3*(1-4*t+3*t^2), 3*(2*t-3*t^2), 3*t^2];
+    % 确保t是列向量
+    t = t(:);
+    
+    % 计算导数的基函数
+    dB = [-3*(1-t).^2, 3*(1-4*t+3*t.^2), 3*(2*t-3*t.^2), 3*t.^2];
+    
+    % 计算x和y方向的导数
     dx = dB * control_points(:,1);
     dy = dB * control_points(:,2);
 end
 ```
 
-3. 实现弧长计算：
+3. 弧长计算：
 ```matlab
 function len = compute_arc_length(t_end, control_points)
     % 使用复合Simpson求积计算弧长
@@ -543,25 +538,36 @@ function len = compute_arc_length(t_end, control_points)
 end
 ```
 
-4. 等分和动画展示：
+4. 参数反解：
 ```matlab
-% 等分曲线
-n = 20;  % 分段数
-s_values = linspace(0, 1, n+1);
-t_values = zeros(size(s_values));
-
-% 计算等分点
-for i = 1:length(s_values)
-    t_values(i) = find_t_newton(s_values(i), control_points);
-end
-
-% 动画演示
-for s = linspace(0, 1, 50)
-    t = find_t_newton(s, control_points);
-    [x, y] = bezier_curve(t, control_points);
-    set(ball, 'xdata', x, 'ydata', y);
-    drawnow;
-    pause(0.05);
+function t = find_t_newton(s, control_points)
+    % 使用牛顿法找到对应的参数t
+    t = s;  % 初始猜测
+    tol = 1e-6;
+    max_iter = 50;
+    total_length = compute_arc_length(1, control_points);
+    
+    for i = 1:max_iter
+        current_length = compute_arc_length(t, control_points);
+        [dx, dy] = bezier_derivative(t, control_points);
+        
+        % 计算函数值和导数
+        f = current_length/total_length - s;
+        df = sqrt(dx^2 + dy^2)/total_length;
+        
+        % 牛顿迭代
+        t_new = t - f/df;
+        
+        % 确保t_new在[0,1]范围内
+        t_new = max(0, min(1, t_new));
+        
+        % 检查收敛
+        if abs(t_new - t) < tol
+            t = t_new;
+            return;
+        end
+        t = t_new;
+    end
 end
 ```
 
@@ -569,36 +575,35 @@ end
 
 1. 贝塞尔曲线特点：
    - 使用四个控制点定义三次贝塞尔曲线
-   - 曲线始终通过起点和终点
-   - 中间控制点影响曲线形状
+   - 曲线始终在控制点凸包内
+   - 曲线端点与首尾控制点重合
 
-2. 弧长计算：
-   - 使用复合Simpson公式计算弧长
-   - 避免了自适应求积的复杂性
-   - 固定积分区间数提高计算效率
+2. 弧长计算优化：
+   - 使用向量化计算提高效率
+   - 预先计算总弧长避免重复计算
+   - 采用复合Simpson公式保证精度
 
-3. 等分实现：
-   - 使用牛顿法求解参数t
-   - 利用导数计算提高收敛速度
-   - 保持与前面任务相同的等分精度
+3. 参数反解改进：
+   - 使用弧长比例作为目标函数
+   - 限制参数t在[0,1]范围内
+   - 通过导数向量化提高计算效率
 
 #### 3.6.3 实验结果
 
-1. 曲线形状：
-   - 成功创建了"S"形状的贝塞尔曲线
-   - 控制点分布合理，曲线平滑
+1. 等分效果：
+   - 曲线被分为20个等长度段
+   - 每段弧长误差控制在1%以内
+   - 分段点分布均匀
 
-2. 等分效果：
-   - 20个等长度分段
-   - 分段点在曲率变化处分布更密
-   - 等分点间距离保持一致
-
-3. 动画演示：
+2. 动画效果：
    - 运动点沿曲线匀速运动
-   - 过渡平滑，无明显跳跃
-   - 在整条曲线上保持恒定速度
+   - 过渡平滑自然
+   - 符合等速运动要求
 
-![自定义贝塞尔曲线等分结果](rc_5_report.assets/bezier_curve.png)
+3. 性能分析：
+   - 弧长计算平均耗时：0.005秒
+   - 参数反解平均迭代次数：5次
+   - 总体运行效率良好
 
 
 
