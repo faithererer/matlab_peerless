@@ -2,6 +2,9 @@
 % 题目6：创建自定义贝塞尔曲线路径并进行等分
 
 function task6_custom_bezier
+    % 创建新的figure并设置固定大小
+    fig = figure('Position', [100 100 800 600], 'Units', 'pixels');
+    
     % 定义控制点（创建一个"S"形状）
     control_points = [
         0, 0;    % P0
@@ -12,7 +15,7 @@ function task6_custom_bezier
     
     % 设置图形窗口
     set(gca, 'XLim', [-0.5 3.5], 'YLim', [-1.5 2.5], ...
-        'Drawmode', 'fast', 'Visible', 'on');
+        'SortMethod', 'childorder', 'Visible', 'on');
     cla
     axis square
     grid on;
