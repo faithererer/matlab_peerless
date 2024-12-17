@@ -2,8 +2,18 @@
 % 题目7：根据任意进度曲线遍历路径
 
 function task7_progress_curve()
+    % 创建输出目录（如果不存在）
+    if ~exist('out', 'dir')
+        mkdir('out');
+    end
+    
+    % 创建视频写入对象，保存到out目录
+    v = VideoWriter(fullfile('out', 'progress_curves.avi'));
+    v.FrameRate = 20;  % 设置帧率
+    open(v);
+    
     % 创建新的figure
-    figure;
+    fig = figure;
     
     % 设置图形窗口
     set(gca, 'XLim', [-0.5 2.5], 'YLim', [-0.5 2.5], ...
@@ -59,10 +69,25 @@ function task7_progress_curve()
             % 使用题目要求的命令更新位置
             set(ball, 'xdata', x, 'ydata', y);
             drawnow;
+            
+            % 捕获当前帧并写入视频
+            frame = getframe(fig);
+            writeVideo(v, frame);
+            
             pause(0.05);
         end
         
         % 暂停一会儿再显示下一种运动
         pause(1);
+        
+        % 捕获暂停状态的几帧
+        for k = 1:20
+            frame = getframe(fig);
+            writeVideo(v, frame);
+        end
     end
+    
+    % 关闭视频文件
+    close(v);
+    fprintf('动画已保存到 out/progress_curves.avi\n');
 end 
