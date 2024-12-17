@@ -28,15 +28,26 @@ function task6_custom_bezier
     
     % 等分曲线
     n = 20;  % 分段数
+    total_length = compute_arc_length(1, control_points);
     s_values = linspace(0, 1, n+1);
     t_values = zeros(size(s_values));
     
     % 计算等分点
     for i = 1:length(s_values)
-        t_values(i) = find_t_newton(s_values(i), control_points);
+        target_length = s_values(i) * total_length;
+        t_values(i) = find_t_newton(target_length/total_length, control_points);
     end
     
-    % 计算等分点的坐标
+    % 验证等分效果
+    lengths = zeros(n, 1);
+    for i = 1:n
+        segment_length = compute_arc_length(t_values(i+1), control_points) - ...
+                        compute_arc_length(t_values(i), control_points);
+        lengths(i) = segment_length;
+        fprintf('段 %d 的长度: %.4f\n', i, segment_length);
+    end
+    
+    % 计算等分点的坐标并绘制
     [x_points, y_points] = bezier_curve(t_values, control_points);
     plot(x_points, y_points, 'ro', 'MarkerSize', 8);
     title('Custom Bezier Curve with Equal Arc Length Partitions');
@@ -49,8 +60,6 @@ function task6_custom_bezier
     for s = linspace(0, 1, 50)
         t = find_t_newton(s, control_points);
         [x, y] = bezier_curve(t, control_points);
-        
-        % 使用题目要求的命令更新位置
         set(ball, 'xdata', x, 'ydata', y);
         drawnow;
         pause(0.05);
