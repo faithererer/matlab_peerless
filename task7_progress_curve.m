@@ -7,13 +7,8 @@ function task7_progress_curve()
         mkdir('out');
     end
     
-    % 创建视频写入对象，保存到out目录
-    v = VideoWriter(fullfile('out', 'progress_curves.avi'));
-    v.FrameRate = 20;  % 设置帧率
-    open(v);
-    
-    % 创建新的figure
-    fig = figure;
+    % 创建新的figure并设置固定大小
+    fig = figure('Position', [100 100 583 437]);
     
     % 设置图形窗口
     set(gca, 'XLim', [-0.5 2.5], 'YLim', [-0.5 2.5], ...
@@ -31,6 +26,12 @@ function task7_progress_curve()
     
     % 创建运动点
     ball = plot(x_plot(1), y_plot(1), 'ro', 'MarkerSize', 10, 'MarkerFaceColor', 'r');
+    
+    % 创建视频写入对象，保存到out目录
+    frame = getframe(fig);  % 获取第一帧来确定尺寸
+    v = VideoWriter(fullfile('out', 'progress_curves.avi'));
+    v.FrameRate = 20;  % 设置帧率
+    open(v);
     
     % 定义不同的进度曲线
     progress_curves = {
