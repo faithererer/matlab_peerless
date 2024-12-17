@@ -12,7 +12,7 @@ function task7_progress_curve()
     
     % 设置图形窗口
     set(gca, 'XLim', [-0.5 2.5], 'YLim', [-0.5 2.5], ...
-        'SortMethod', 'childorder', 'Visible', 'on');  % 使用新的SortMethod属性
+        'SortMethod', 'childorder', 'Visible', 'on');
     cla
     axis square
     grid on;
@@ -27,13 +27,17 @@ function task7_progress_curve()
     % 创建运动点
     ball = plot(x_plot(1), y_plot(1), 'ro', 'MarkerSize', 10, 'MarkerFaceColor', 'r');
     
-    % 获取第一帧并创建视频写入对象
-    drawnow;  % 确保图形已经完全渲染
+    % 获取第一帧并确定视频大小
+    drawnow;
     frame = getframe(fig);
+    [height, width, ~] = size(frame.cdata);
+    
+    % 创建视频写入对象，使用确定的尺寸
     v = VideoWriter(fullfile('out', 'progress_curves.avi'));
-    v.FrameRate = 20;  % 设置帧率
-    v.Quality = 100;   % 设置最高质量
+    v.FrameRate = 20;
+    v.Quality = 100;
     open(v);
+    writeVideo(v, frame);  % 写入第一帧
     
     % 定义不同的进度曲线
     progress_curves = {
@@ -75,6 +79,10 @@ function task7_progress_curve()
             
             % 捕获当前帧并写入视频
             frame = getframe(fig);
+            % 确保帧大小一致
+            if size(frame.cdata, 1) ~= height || size(frame.cdata, 2) ~= width
+                frame.cdata = imresize(frame.cdata, [height width]);
+            end
             writeVideo(v, frame);
             
             pause(0.05);
@@ -86,6 +94,10 @@ function task7_progress_curve()
         % 捕获暂停状态的几帧
         for k = 1:20
             frame = getframe(fig);
+            % 确保帧大小一致
+            if size(frame.cdata, 1) ~= height || size(frame.cdata, 2) ~= width
+                frame.cdata = imresize(frame.cdata, [height width]);
+            end
             writeVideo(v, frame);
         end
     end
