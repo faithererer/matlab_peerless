@@ -16,10 +16,10 @@ function task7_progress_curve()
     };
     
     curve_names = {
-        'Cube Root Curve (Fast Start, Slow End)',
-        'Square Curve (Slow Start, Fast End)',
-        'Sine Curve (Smooth Acceleration)',
-        'Composite Sine Curve (Middle Pause)'
+        'Cube Root Curve',
+        'Square Curve ',
+        'Sine Curve',
+        'Composite Sine Curve'
     };
     
     video_names = {
