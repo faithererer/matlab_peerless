@@ -7,38 +7,6 @@ function task7_progress_curve()
         mkdir('out');
     end
     
-    % 创建新的figure并设置固定大小
-    fig = figure('Position', [100 100 800 600], 'Units', 'pixels');
-    
-    % 设置图形窗口
-    set(gca, 'XLim', [-0.5 2.5], 'YLim', [-0.5 2.5], ...
-        'SortMethod', 'childorder', 'Visible', 'on');
-    cla
-    axis square
-    grid on;
-    hold on;
-    
-    % 绘制完整路径
-    t_plot = linspace(0, 1, 100);
-    x_plot = 0.5 + 0.3*t_plot + 3.9*t_plot.^2 - 4.7*t_plot.^3;
-    y_plot = 1.5 + 0.3*t_plot + 0.9*t_plot.^2 - 2.7*t_plot.^3;
-    plot(x_plot, y_plot, 'b-', 'LineWidth', 1);
-    
-    % 创建运动点
-    ball = plot(x_plot(1), y_plot(1), 'ro', 'MarkerSize', 10, 'MarkerFaceColor', 'r');
-    
-    % 获取第一帧并确定视频大小
-    drawnow;
-    frame = getframe(fig);
-    [height, width, ~] = size(frame.cdata);
-    
-    % 创建视频写入对象，使用确定的尺寸
-    v = VideoWriter(fullfile('out', 'progress_curves.avi'));
-    v.FrameRate = 20;
-    v.Quality = 100;
-    open(v);
-    writeVideo(v, frame);  % 写入第一帧
-    
     % 定义不同的进度曲线
     progress_curves = {
         @(s) s^(1/3),                                  % 三次根曲线：起始快末尾慢
@@ -54,12 +22,49 @@ function task7_progress_curve()
         'Composite Sine Curve (Middle Pause)'
     };
     
+    video_names = {
+        'cube_root_motion.avi',
+        'square_motion.avi',
+        'sine_motion.avi',
+        'composite_sine_motion.avi'
+    };
+    
     % 对每种进度曲线进行演示
     for i = 1:length(progress_curves)
+        % 创建新的figure并设置固定大小
+        fig = figure('Position', [100 100 800 600], 'Units', 'pixels');
+        
+        % 设置图形窗口
+        set(gca, 'XLim', [-0.5 2.5], 'YLim', [-0.5 2.5], ...
+            'SortMethod', 'childorder', 'Visible', 'on');
+        cla
+        axis square
+        grid on;
+        hold on;
+        
+        % 绘制完整路径
+        t_plot = linspace(0, 1, 100);
+        x_plot = 0.5 + 0.3*t_plot + 3.9*t_plot.^2 - 4.7*t_plot.^3;
+        y_plot = 1.5 + 0.3*t_plot + 0.9*t_plot.^2 - 2.7*t_plot.^3;
+        plot(x_plot, y_plot, 'b-', 'LineWidth', 1);
+        
+        % 创建运动点
+        ball = plot(x_plot(1), y_plot(1), 'ro', 'MarkerSize', 10, 'MarkerFaceColor', 'r');
+        
+        % 设置标题
         title(curve_names{i});
         
-        % 重置运动点位置
-        set(ball, 'xdata', x_plot(1), 'ydata', y_plot(1));
+        % 获取第一帧并确定视频大小
+        drawnow;
+        frame = getframe(fig);
+        [height, width, ~] = size(frame.cdata);
+        
+        % 创建视频写入对象
+        v = VideoWriter(fullfile('out', video_names{i}));
+        v.FrameRate = 20;
+        v.Quality = 100;
+        open(v);
+        writeVideo(v, frame);  % 写入第一帧
         
         % 按照当前进度曲线运动
         for u = linspace(0, 1, 50)
@@ -79,7 +84,6 @@ function task7_progress_curve()
             
             % 捕获当前帧并写入视频
             frame = getframe(fig);
-            % 确保帧大小一致
             if size(frame.cdata, 1) ~= height || size(frame.cdata, 2) ~= width
                 frame.cdata = imresize(frame.cdata, [height width]);
             end
@@ -88,21 +92,20 @@ function task7_progress_curve()
             pause(0.05);
         end
         
-        % 暂停一会儿再显示下一种运动
-        pause(1);
-        
-        % 捕获暂停状态的几帧
+        % 捕获最后几帧
         for k = 1:20
             frame = getframe(fig);
-            % 确保帧大小一致
             if size(frame.cdata, 1) ~= height || size(frame.cdata, 2) ~= width
                 frame.cdata = imresize(frame.cdata, [height width]);
             end
             writeVideo(v, frame);
         end
+        
+        % 关闭视频文件
+        close(v);
+        fprintf('动画已保存到 out/%s\n', video_names{i});
+        
+        % 关闭当前figure
+        close(fig);
     end
-    
-    % 关闭视频文件
-    close(v);
-    fprintf('动画已保存到 out/progress_curves.avi\n');
 end 
